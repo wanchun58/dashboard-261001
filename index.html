@@ -100,10 +100,10 @@
     .audio-btn:hover { background: #1d4ed8; }
     .audio-btn.unlocked { background: #10b981; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2); }
 
-    /* 三欄式 Dashboard 架構 */
+    /* 三欄式 Dashboard 架構 (調整第一欄寬度為 420px，第三欄為 340px) */
     .dashboard-layout {
       display: grid;
-      grid-template-columns: 320px 380px 1fr;
+      grid-template-columns: 420px 1fr 340px;
       gap: 20px;
       align-items: start;
     }
@@ -256,18 +256,18 @@
     .data-label { color: var(--text-secondary); }
     .data-val { font-weight: 600; color: var(--text-primary); text-align: right; }
 
-    /* 全台震度網格風格 */
+    /* 全台震度網格風格 (修改為精準每行三個縣市) */
     .county-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
 
     .county-card {
       background: #f8fafc;
       border: 1px solid var(--border-color);
       border-radius: 10px;
-      padding: 10px;
+      padding: 8px 4px;
       text-align: center;
       transition: all 0.2s ease;
       cursor: pointer;
@@ -283,14 +283,14 @@
       background: #eff6ff;
     }
 
-    .county-name { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
+    .county-name { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 4px; }
 
     .intensity-tag {
       display: inline-block;
-      padding: 4px 10px;
+      padding: 3px 0;
       border-radius: 6px;
       font-weight: 700;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       width: 100%;
     }
 
