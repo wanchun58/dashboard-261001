@@ -36,6 +36,12 @@
       margin-bottom: 20px;
     }
 
+    .header-title-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
     h1 {
       margin: 0;
       font-size: 1.5rem;
@@ -44,6 +50,24 @@
       display: flex;
       align-items: center;
       gap: 10px;
+    }
+
+    .data-source-tag {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .data-source-tag a {
+      color: var(--primary-accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .data-source-tag a:hover {
+      text-decoration: underline;
     }
 
     .status-bar {
@@ -110,6 +134,49 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
+    }
+
+    /* 縣市篩選工具列 */
+    .filter-box {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .county-select {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: #f8fafc;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .county-select:focus {
+      border-color: var(--primary-accent);
+      background: #ffffff;
+    }
+
+    .reset-btn {
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: #ffffff;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .reset-btn:hover {
+      background: #f1f5f9;
+      color: var(--text-primary);
     }
 
     /* 歷史地震列表風格 */
@@ -117,7 +184,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      max-height: 600px;
+      max-height: 560px;
       overflow-y: auto;
       padding-right: 4px;
     }
@@ -154,6 +221,14 @@
       background: #fef2f2;
       padding: 4px 10px;
       border-radius: 8px;
+    }
+
+    .county-intensity-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
     }
 
     /* 主卡片資訊展示 */
@@ -195,11 +270,17 @@
       padding: 10px;
       text-align: center;
       transition: all 0.2s ease;
+      cursor: pointer;
     }
 
     .county-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+
+    .county-card.highlight {
+      border: 2px solid var(--primary-accent);
+      background: #eff6ff;
     }
 
     .county-name { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; }
@@ -213,7 +294,7 @@
       width: 100%;
     }
 
-    /* 氣象署標準震度配色 (明亮底圖適用) */
+    /* 氣象署標準震度配色 */
     .i-0  { background: #e2e8f0; color: #64748b; } /* 無感 */
     .i-1  { background: #e9d5ff; color: #6b21a8; } /* 1級 */
     .i-2  { background: #bfdbfe; color: #1e40af; } /* 2級 */
@@ -236,12 +317,26 @@
       animation: pulse-light 1.5s infinite;
       border-color: #ef4444 !important;
     }
+
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>地動監測｜地震即時觀測看板</h1>
+    <div class="header-title-group">
+      <h1>地動監測｜地震即時觀測看板</h1>
+      <div class="data-source-tag">
+        <span>📡 資料來源：</span>
+        <a href="https://opendata.cwa.gov.tw/" target="_blank" rel="noopener">交通部中央氣象署 (CWA) 氣象開放資料平台</a>
+        <span>（資料集：E-A0015-001 顯著有感地震報告）</span>
+      </div>
+    </div>
     <div class="status-bar">
       <span id="update-time" class="status-time">資料連線中...</span>
       <button id="audio-btn" class="audio-btn">🔊 點擊啟用聲音警報</button>
@@ -250,12 +345,21 @@
 
   <div class="dashboard-layout">
     
-    <!-- 欄位一：歷史地震紀錄選單 -->
+    <!-- 欄位一：歷史地震紀錄選單 + 縣市篩選 -->
     <div class="panel history-panel">
       <div class="panel-title">
-        <span>歷史顯著地震紀錄</span>
+        <span>歷史地震紀錄</span>
         <span id="history-count" style="font-size: 0.8rem; color: var(--text-secondary);">共 0 筆</span>
       </div>
+
+      <!-- 縣市查詢工具列 -->
+      <div class="filter-box">
+        <select id="county-filter" class="county-select">
+          <option value="">🔍 選擇縣市（顯示全台）</option>
+        </select>
+        <button id="reset-filter-btn" class="reset-btn">重置</button>
+      </div>
+
       <div class="history-list" id="history-list">
         <!-- 由 JS 動態注入歷史資料 -->
       </div>
@@ -298,6 +402,10 @@
 
   </div>
 
+  <footer>
+    本看板資料透過 API 自動同步，僅供學術與個人資訊監控用途。
+  </footer>
+
   <script>
     const CWA_API_KEY = 'rdec-key-123-45678-011121314';
     const API_URL = `https://opendata.cwa.gov.tw/api/v1/rest/datastore/E-A0015-001?Authorization=${CWA_API_KEY}`;
@@ -308,10 +416,34 @@
       "高雄市", "屏東縣", "宜蘭縣", "花蓮縣", "臺東縣", "澎湖縣", "金門縣", "連江縣"
     ];
 
-    let earthquakeRecords = []; // 儲存 API 回傳的多筆地震資料
-    let selectedIndex = 0;      // 當前選中的地震索引
+    let earthquakeRecords = [];
+    let filteredRecords = [];
+    let selectedIndex = 0;
+    let selectedCounty = "";
     let isAudioUnlocked = false;
     const alarmAudio = new Audio('https://actions.google.com/sounds/v1/alarms/beep_short.ogg');
+
+    // 填入縣市下拉選單
+    function initCountySelect() {
+      const select = document.getElementById('county-filter');
+      TAIWAN_COUNTIES.forEach(county => {
+        const opt = document.createElement('option');
+        opt.value = county;
+        opt.textContent = county;
+        select.appendChild(opt);
+      });
+
+      select.addEventListener('change', (e) => {
+        selectedCounty = e.target.value;
+        filterRecordsByCounty();
+      });
+
+      document.getElementById('reset-filter-btn').addEventListener('click', () => {
+        select.value = "";
+        selectedCounty = "";
+        filterRecordsByCounty();
+      });
+    }
 
     // 音效解鎖機制
     document.getElementById('audio-btn').addEventListener('click', function() {
@@ -344,17 +476,47 @@
       return map[str] || { label: '0級', class: 'i-0' };
     }
 
-    // 初始化 22 縣市卡片 DOM 結構
+    // 取得特定地震在特定縣市的震度
+    function getCountyIntensityForEq(eq, countyName) {
+      if (!eq || !eq.Intensity || !eq.Intensity.ShakingArea) return null;
+      const area = eq.Intensity.ShakingArea.find(a => a.CountyName === countyName);
+      return area ? area.AreaIntensity : null;
+    }
+
+    // 根據選擇的縣市進行資料篩選
+    function filterRecordsByCounty() {
+      if (!selectedCounty) {
+        filteredRecords = [...earthquakeRecords];
+      } else {
+        filteredRecords = earthquakeRecords.filter(eq => {
+          const intensity = getCountyIntensityForEq(eq, selectedCounty);
+          return intensity && intensity !== '0' && intensity !== '0級';
+        });
+      }
+      selectedIndex = 0;
+      renderHistoryList();
+      updateSelectedDetail();
+    }
+
+    // 初始化 22 縣市卡片 DOM 結構 (點擊右側縣市也可直接發動篩選)
     function initCountyGrid() {
       const container = document.getElementById('county-grid');
       container.innerHTML = '';
       TAIWAN_COUNTIES.forEach(county => {
         const card = document.createElement('div');
         card.className = 'county-card';
+        card.id = `card-${county}`;
         card.innerHTML = `
           <div class="county-name">${county}</div>
           <span class="intensity-tag i-0" id="tag-${county}">0級</span>
         `;
+
+        card.addEventListener('click', () => {
+          selectedCounty = county;
+          document.getElementById('county-filter').value = county;
+          filterRecordsByCounty();
+        });
+
         container.appendChild(card);
       });
     }
@@ -364,16 +526,29 @@
       const container = document.getElementById('history-list');
       container.innerHTML = '';
 
-      document.getElementById('history-count').textContent = `共 ${earthquakeRecords.length} 筆`;
+      document.getElementById('history-count').textContent = `共 ${filteredRecords.length} 筆`;
 
-      earthquakeRecords.forEach((eq, idx) => {
+      if (filteredRecords.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 20px;">無該縣市有感地震紀錄</div>`;
+        return;
+      }
+
+      filteredRecords.forEach((eq, idx) => {
         const info = eq.EarthquakeInfo;
         const item = document.createElement('div');
         item.className = `history-item ${idx === selectedIndex ? 'active' : ''}`;
         
+        // 如果有選取縣市，顯示該縣市在該次地震中的震度
+        let countyIntensityTag = "";
+        if (selectedCounty) {
+          const cIntensity = getCountyIntensityForEq(eq, selectedCounty);
+          const sanitized = sanitizeIntensity(cIntensity);
+          countyIntensityTag = `<span class="county-intensity-badge ${sanitized.class}">${selectedCounty} ${sanitized.label}</span>`;
+        }
+
         item.innerHTML = `
           <div>
-            <div class="history-time">${info.OriginTime.substring(5, 16)}</div>
+            <div class="history-time">${info.OriginTime.substring(5, 16)} ${countyIntensityTag}</div>
             <div class="history-loc">${info.Epicenter.Location.substring(0, 10)}...</div>
           </div>
           <div class="history-mag">M ${info.EarthquakeMagnitude.MagnitudeValue}</div>
@@ -389,21 +564,19 @@
       });
     }
 
-    // 更新右側兩欄的詳細數據（根據 selectedIndex）
+    // 更新詳細數據與縣市高亮
     function updateSelectedDetail() {
-      if (!earthquakeRecords[selectedIndex]) return;
+      if (!filteredRecords[selectedIndex]) return;
 
-      const eq = earthquakeRecords[selectedIndex];
+      const eq = filteredRecords[selectedIndex];
       const info = eq.EarthquakeInfo;
 
-      // 更新詳細資訊欄位
       document.getElementById('eq-mag').textContent = `M ${info.EarthquakeMagnitude.MagnitudeValue}`;
       document.getElementById('eq-time').textContent = info.OriginTime;
       document.getElementById('eq-loc').textContent = info.Epicenter.Location;
       document.getElementById('eq-depth').textContent = `${info.FocalDepth} km`;
       document.getElementById('eq-report').textContent = eq.ReportContent || '無詳細報告文字';
 
-      // 整理各地區震度
       const countyIntensityMap = {};
       if (eq.Intensity && eq.Intensity.ShakingArea) {
         eq.Intensity.ShakingArea.forEach(area => {
@@ -413,19 +586,29 @@
         });
       }
 
-      // 局部更新 22 縣市標籤
       TAIWAN_COUNTIES.forEach(county => {
         const rawVal = countyIntensityMap[county];
         const sanitized = sanitizeIntensity(rawVal);
         const tag = document.getElementById(`tag-${county}`);
+        const card = document.getElementById(`card-${county}`);
+
         if (tag) {
           tag.textContent = sanitized.label;
           tag.className = `intensity-tag ${sanitized.class}`;
         }
+
+        // 高亮選中的縣市卡片
+        if (card) {
+          if (selectedCounty === county) {
+            card.classList.add('highlight');
+          } else {
+            card.classList.remove('highlight');
+          }
+        }
       });
     }
 
-    // 抓取 API 並邏輯處理
+    // 抓取 API
     async function fetchEarthquakeData() {
       try {
         const res = await fetch(API_URL);
@@ -434,16 +617,11 @@
         const result = await res.json();
         if (!result.records || !result.records.Earthquake) return;
 
-        // 拿取 API 的多筆地震資料
         earthquakeRecords = result.records.Earthquake;
-        
         document.getElementById('update-time').textContent = `最後連線：${new Date().toLocaleTimeString()}`;
 
-        // 渲染選單與主數據
-        renderHistoryList();
-        updateSelectedDetail();
+        filterRecordsByCounty();
 
-        // 判斷最新一筆是否為新地震
         if (earthquakeRecords.length > 0) {
           const latestEventId = earthquakeRecords[0].EarthquakeInfo.OriginTime;
           const lastNotifiedId = localStorage.getItem('last_earthquake_id');
@@ -451,7 +629,6 @@
           if (latestEventId !== lastNotifiedId) {
             localStorage.setItem('last_earthquake_id', latestEventId);
             
-            // 觸發警報燈號
             const panel = document.getElementById('main-info-panel');
             panel.classList.add('alarm-active');
             setTimeout(() => panel.classList.remove('alarm-active'), 5000);
@@ -469,9 +646,10 @@
     }
 
     // 啟動看板
+    initCountySelect();
     initCountyGrid();
     fetchEarthquakeData();
-    setInterval(fetchEarthquakeData, 20000); // 20 秒輪詢一次
+    setInterval(fetchEarthquakeData, 20000);
   </script>
 </body>
 </html>
